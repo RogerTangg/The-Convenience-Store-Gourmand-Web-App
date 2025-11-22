@@ -93,7 +93,7 @@ Deno.serve(async (req) => {
 
         // Call Gemini API directly using fetch
         // Use v1beta API with correct model name: gemini-1.5-flash (without -latest suffix)
-        const modelId = "gemini-1.5-flash";
+        const modelId = "gemini-2.5-flash";
         const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${apiKey}`;
 
         // Log URL (masked) for debugging
