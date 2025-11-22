@@ -1,4 +1,3 @@
-import { GoogleGenAI, SchemaType } from "npm:@google/generative-ai@0.21.0";
 
 interface MenuRequest {
     budget: number;
@@ -64,42 +63,6 @@ Deno.serve(async (req) => {
             );
         }
 
-        // Initialize Gemini API
-        const ai = new GoogleGenAI(apiKey);
-        // Use the stable 1.5 Flash model which is fast and reliable
-        const modelId = "gemini-1.5-flash";
-        const model = ai.getGenerativeModel({
-            model: modelId,
-            generationConfig: {
-                responseMimeType: "application/json",
-                responseSchema: {
-                    type: SchemaType.OBJECT,
-                    properties: {
-                        title: { type: SchemaType.STRING },
-                        description: { type: SchemaType.STRING },
-                        ingredients: {
-                            type: SchemaType.ARRAY,
-                            items: {
-                                type: SchemaType.OBJECT,
-                                properties: {
-                                    name: { type: SchemaType.STRING },
-                                    price: { type: SchemaType.NUMBER },
-                                    notes: { type: SchemaType.STRING }
-                                }
-                            }
-                        },
-                        plating_guide: {
-                            type: SchemaType.ARRAY,
-                            items: { type: SchemaType.STRING }
-                        },
-                        total_price: { type: SchemaType.NUMBER },
-                        chef_comment: { type: SchemaType.STRING }
-                    },
-                    required: ["title", "description", "ingredients", "plating_guide", "total_price", "chef_comment"]
-                }
-            }
-        });
-
         const prompt = `
       You are a pretentious, avant-garde Michelin-star chef who specializes in "Convenience Store Fine Dining". 
       Your task is to take a budget of ${budget} TWD and create a high-end, multi-course (or single exquisite dish) menu using ONLY items available at ${store} in Taiwan.
@@ -116,8 +79,63 @@ Deno.serve(async (req) => {
       Response MUST be in Traditional Chinese (Taiwan).
     `;
 
-        const result = await model.generateContent(prompt);
-        const responseText = result.response.text();
+        // Call Gemini API directly using fetch
+        const modelId = "gemini-1.5-flash";
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${apiKey}`;
+
+        const payload = {
+            contents: [{
+                parts: [{ text: prompt }]
+            }],
+            generationConfig: {
+                responseMimeType: "application/json",
+                responseSchema: {
+                    type: "OBJECT",
+                    properties: {
+                        title: { type: "STRING" },
+                        description: { type: "STRING" },
+                        ingredients: {
+                            type: "ARRAY",
+                            items: {
+                                type: "OBJECT",
+                                properties: {
+                                    name: { type: "STRING" },
+                                    price: { type: "NUMBER" },
+                                    notes: { type: "STRING" }
+                                }
+                            }
+                        },
+                        plating_guide: {
+                            type: "ARRAY",
+                            items: { type: "STRING" }
+                        },
+                        total_price: { type: "NUMBER" },
+                        chef_comment: { type: "STRING" }
+                    },
+                    required: ["title", "description", "ingredients", "plating_guide", "total_price", "chef_comment"]
+                }
+            }
+        };
+
+        const apiResponse = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (!apiResponse.ok) {
+            const errorText = await apiResponse.text();
+            console.error("Gemini API Error:", errorText);
+            throw new Error(`Gemini API returned ${apiResponse.status}: ${errorText}`);
+        }
+
+        const result = await apiResponse.json();
+
+        // Extract text from Gemini response structure
+        // Structure: candidates[0].content.parts[0].text
+        const responseText = result.candidates?.[0]?.content?.parts?.[0]?.text;
 
         if (responseText) {
             try {
