@@ -66,7 +66,8 @@ Deno.serve(async (req) => {
 
         // Initialize Gemini API
         const ai = new GoogleGenAI({ apiKey });
-        const modelId = "gemini-2.0-flash-exp";
+        // Use the stable 1.5 Flash model which is fast and reliable
+        const modelId = "gemini-1.5-flash";
 
         const prompt = `
       You are a pretentious, avant-garde Michelin-star chef who specializes in "Convenience Store Fine Dining". 
