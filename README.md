@@ -2,7 +2,7 @@
 
 AI 驅動的便利商店美食菜單生成器，將平凡食材轉化為米其林級創意料理。
 
-## 🎯 功能
+## 功能
 
 - **AI 菜單生成**：使用 Gemini AI 根據預算、商店、風格生成創意菜單
 - **預算控制**：自由設定 50-500 TWD 預算範圍
@@ -10,22 +10,7 @@ AI 驅動的便利商店美食菜單生成器，將平凡食材轉化為米其�
 - **風格選擇**：法式、日式、美式、深夜頹廢四種料理風格
 - **詳細擺盤**：提供分步擺盤指南與主廚評論
 
-## 🏗️ 技術架構
-
-```
-前端 (React + Vite)
-    ↓
-Supabase Edge Function (API 代理)
-    ↓
-Google Gemini 2.0 Flash API
-```
-
-**安全設計**：
-- API 金鑰存放於 Supabase Secrets（伺服器端）
-- 前端無任何敏感資訊暴露
-- 使用 Row Level Security (RLS) 保護資料庫
-
-## 🛠️ 技術棧
+## 技術棧
 
 | 層級 | 技術 |
 |------|------|
@@ -35,7 +20,7 @@ Google Gemini 2.0 Flash API
 | 資料庫 | PostgreSQL (Supabase) |
 | AI | Google Gemini 2.0 Flash |
 
-## 🚀 快速開始
+## 快速開始
 
 ```bash
 # 安裝依賴
@@ -45,7 +30,7 @@ npm install
 npm run dev
 ```
 
-## 📂 專案結構
+## 專案結構
 
 ```
 ├── components/          # React 組件
@@ -56,7 +41,12 @@ npm run dev
 │   └── migrations/     # 資料庫遷移
 └── types.ts            # TypeScript 型別定義
 ```
+## 部署網站
 
+歡迎體驗本專案
+```bash
+https://the-convenience-store-gourmand-web-app.pages.dev/
+```
 ---
 
 **專案類型**：娛樂性質、非商業用途
