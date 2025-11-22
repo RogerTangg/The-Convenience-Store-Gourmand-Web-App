@@ -1,4 +1,4 @@
-import { GoogleGenAI, Type } from "https://esm.sh/@google/genai@1.30.0";
+import { GoogleGenAI, SchemaType } from "https://esm.sh/@google/generative-ai@0.21.0";
 
 interface MenuRequest {
     budget: number;
@@ -65,9 +65,40 @@ Deno.serve(async (req) => {
         }
 
         // Initialize Gemini API
-        const ai = new GoogleGenAI({ apiKey });
+        const ai = new GoogleGenAI(apiKey);
         // Use the stable 1.5 Flash model which is fast and reliable
         const modelId = "gemini-1.5-flash";
+        const model = ai.getGenerativeModel({
+            model: modelId,
+            generationConfig: {
+                responseMimeType: "application/json",
+                responseSchema: {
+                    type: SchemaType.OBJECT,
+                    properties: {
+                        title: { type: SchemaType.STRING },
+                        description: { type: SchemaType.STRING },
+                        ingredients: {
+                            type: SchemaType.ARRAY,
+                            items: {
+                                type: SchemaType.OBJECT,
+                                properties: {
+                                    name: { type: SchemaType.STRING },
+                                    price: { type: SchemaType.NUMBER },
+                                    notes: { type: SchemaType.STRING }
+                                }
+                            }
+                        },
+                        plating_guide: {
+                            type: SchemaType.ARRAY,
+                            items: { type: SchemaType.STRING }
+                        },
+                        total_price: { type: SchemaType.NUMBER },
+                        chef_comment: { type: SchemaType.STRING }
+                    },
+                    required: ["title", "description", "ingredients", "plating_guide", "total_price", "chef_comment"]
+                }
+            }
+        });
 
         const prompt = `
       You are a pretentious, avant-garde Michelin-star chef who specializes in "Convenience Store Fine Dining". 
@@ -85,42 +116,12 @@ Deno.serve(async (req) => {
       Response MUST be in Traditional Chinese (Taiwan).
     `;
 
-        const response = await ai.models.generateContent({
-            model: modelId,
-            contents: prompt,
-            config: {
-                responseMimeType: "application/json",
-                responseSchema: {
-                    type: Type.OBJECT,
-                    properties: {
-                        title: { type: Type.STRING },
-                        description: { type: Type.STRING },
-                        ingredients: {
-                            type: Type.ARRAY,
-                            items: {
-                                type: Type.OBJECT,
-                                properties: {
-                                    name: { type: Type.STRING },
-                                    price: { type: Type.NUMBER },
-                                    notes: { type: Type.STRING }
-                                }
-                            }
-                        },
-                        plating_guide: {
-                            type: Type.ARRAY,
-                            items: { type: Type.STRING }
-                        },
-                        total_price: { type: Type.NUMBER },
-                        chef_comment: { type: Type.STRING }
-                    },
-                    required: ["title", "description", "ingredients", "plating_guide", "total_price", "chef_comment"]
-                }
-            }
-        });
+        const result = await model.generateContent(prompt);
+        const responseText = result.response.text();
 
-        if (response.text) {
+        if (responseText) {
             try {
-                const menuData = JSON.parse(response.text) as MenuData;
+                const menuData = JSON.parse(responseText) as MenuData;
 
                 return new Response(
                     JSON.stringify(menuData),
