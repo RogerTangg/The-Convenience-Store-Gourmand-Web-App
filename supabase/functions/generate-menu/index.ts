@@ -34,13 +34,25 @@ Deno.serve(async (req) => {
 
     try {
         // Get API key from environment (secure server-side storage)
-        const apiKey = Deno.env.get('GEMINI_API_KEY');
+        let apiKey = Deno.env.get('GEMINI_API_KEY');
         if (!apiKey) {
+            console.error("Missing GEMINI_API_KEY");
             throw new Error('GEMINI_API_KEY not configured');
         }
 
+        // Sanitize API key (remove whitespace/newlines that cause URL errors)
+        apiKey = apiKey.trim();
+
         // Parse request body
-        const { budget, store, style } = await req.json() as MenuRequest;
+        let body;
+        try {
+            body = await req.json();
+        } catch (e) {
+            console.error("Failed to parse request body:", e);
+            return new Response(JSON.stringify({ error: 'Invalid JSON body' }), { status: 400, headers: corsHeaders });
+        }
+
+        const { budget, store, style } = body as MenuRequest;
 
         // Input validation
         if (!budget || budget < 50 || budget > 500) {
@@ -82,6 +94,9 @@ Deno.serve(async (req) => {
         // Call Gemini API directly using fetch
         const modelId = "gemini-1.5-flash";
         const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${apiKey}`;
+
+        // Log URL (masked) for debugging
+        console.log(`Calling Gemini API: ${url.replace(apiKey, '***')}`);
 
         const payload = {
             contents: [{
