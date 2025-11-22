@@ -92,9 +92,9 @@ Deno.serve(async (req) => {
     `;
 
         // Call Gemini API directly using fetch
-        // Use gemini-1.5-flash-latest which is supported in v1beta
-        const modelId = "gemini-1.5-flash-latest";
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${apiKey}`;
+        // Use correct model name for v1 API (not v1beta)
+        const modelId = "gemini-1.5-flash";
+        const url = `https://generativelanguage.googleapis.com/v1/models/${modelId}:generateContent?key=${apiKey}`;
 
         // Log URL (masked) for debugging
         console.log(`Calling Gemini API: ${url.replace(apiKey, '***')}`);
@@ -104,6 +104,10 @@ Deno.serve(async (req) => {
                 parts: [{ text: prompt }]
             }],
             generationConfig: {
+                temperature: 1.0,
+                topP: 0.95,
+                topK: 40,
+                maxOutputTokens: 8192,
                 responseMimeType: "application/json",
                 responseSchema: {
                     type: "OBJECT",

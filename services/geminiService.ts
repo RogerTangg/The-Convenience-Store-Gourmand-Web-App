@@ -4,6 +4,8 @@ import { UserConfig, MenuData } from "../types";
 
 export const generateMenu = async (config: UserConfig): Promise<MenuData> => {
   try {
+    console.log("Sending request with config:", config);
+
     // Call Supabase Edge Function instead of direct Gemini API
     const { data, error } = await supabase.functions.invoke('generate-menu', {
       body: {
@@ -22,11 +24,16 @@ export const generateMenu = async (config: UserConfig): Promise<MenuData> => {
       throw new Error("廚師拒絕烹飪。");
     }
 
+    console.log("Received menu data:", data);
+
     // Return the menu data
     return data as MenuData;
 
   } catch (err) {
     console.error("Menu generation failed:", err);
+    if (err instanceof Error) {
+      throw err;
+    }
     throw new Error("無法生成菜單，請稍後再試。");
   }
 };
