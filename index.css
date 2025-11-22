@@ -1,0 +1,8 @@
+/* This file is intentionally minimal - all styles are in Tailwind via CDN and inline styles */
+/* If you need custom global styles, add them here */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}

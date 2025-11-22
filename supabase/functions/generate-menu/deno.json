@@ -1,0 +1,7 @@
+{
+    "compilerOptions": {
+        "types": [
+            "https://esm.sh/@types/deno@1.41.0/index.d.ts"
+        ]
+    }
+}
