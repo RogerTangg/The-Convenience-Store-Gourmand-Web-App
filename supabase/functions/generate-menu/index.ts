@@ -1,4 +1,4 @@
-import { GoogleGenAI, SchemaType } from "https://esm.sh/@google/generative-ai@0.21.0";
+import { GoogleGenAI, SchemaType } from "npm:@google/generative-ai@0.21.0";
 
 interface MenuRequest {
     budget: number;
